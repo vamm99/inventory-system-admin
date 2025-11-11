@@ -1,0 +1,89 @@
+<div>
+  <h1 class="text-2xl font-bold text-gray-800 my-4">Categoría</h1>
+
+  <!-- 🔍 Buscador + Botón -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <form class="flex w-full sm:w-3/5">
+      <input
+        type="text"
+        placeholder="Buscar categoría"
+        class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+      />
+    </form>
+    <button
+      class="bg-blue-500 hover:bg-blue-600 text-white py-1.5 px-3 text-sm rounded w-full sm:w-auto"
+    >
+      Agregar Categoría
+    </button>
+  </div>
+
+  <!-- 📋 Tabla -->
+  <div class="overflow-x-auto my-4">
+    <table class="min-w-full divide-y-2 divide-gray-200">
+      <thead class="ltr:text-left rtl:text-right">
+        <tr class="*:font-medium *:text-gray-900 text-center">
+          <th class="px-3 py-2 whitespace-nowrap">Nombre</th>
+          <th class="px-3 py-2 whitespace-nowrap">Fecha de creación</th>
+          <th class="px-3 py-2 whitespace-nowrap">Fecha de modificación</th>
+          <th class="px-3 py-2 whitespace-nowrap">Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-gray-200">
+        <tr class="*:text-gray-900 *:first:font-medium text-center">
+          <td class="px-3 py-2 whitespace-nowrap">Nandor the Relentless</td>
+          <td class="px-3 py-2 whitespace-nowrap">04/06/1262</td>
+          <td class="px-3 py-2 whitespace-nowrap">04/06/1262</td>
+          <td class="px-3 py-2 whitespace-nowrap">
+            <a routerLink="/admin/category/product-detail/1" class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
+              Ver detalles
+            </a>
+            <button class="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600">
+              Eliminar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 🔢 Paginación -->
+  <div class="flex flex-col sm:flex-row justify-between items-center mt-6 gap-3">
+    <!-- Info -->
+    <span class="text-sm text-gray-600">
+      Página <span class="font-semibold text-gray-800">1</span> de
+      <span class="font-semibold text-gray-800">10</span> —
+      Mostrando <span class="font-semibold text-gray-800">5</span> resultados
+    </span>
+
+    <!-- Controles -->
+    <div class="flex items-center gap-1">
+      <button
+        class="px-3 py-1 text-sm text-gray-600 border rounded hover:bg-gray-100 disabled:opacity-50"
+        disabled
+      >
+        « Anterior
+      </button>
+      <button
+        class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+      >
+        1
+      </button>
+      <button
+        class="px-3 py-1 text-sm text-gray-600 border rounded hover:bg-gray-100"
+      >
+        2
+      </button>
+      <button
+        class="px-3 py-1 text-sm text-gray-600 border rounded hover:bg-gray-100"
+      >
+        3
+      </button>
+      <button
+        class="px-3 py-1 text-sm text-gray-600 border rounded hover:bg-gray-100"
+      >
+        Siguiente »
+      </button>
+    </div>
+  </div>
+</div>
