@@ -9,7 +9,7 @@ import { Inventory } from './admin/inventory/inventory';
 import { Product } from './admin/product/product';
 import { Provider } from './admin/provider/provider';
 import { Nofound } from './admin/nofound/nofound';
-import { ProductDetail } from './admin/category/product-detail/product-detail';
+import { CategoryDetail } from './admin/category/category-detail/category-detail';
 import { AuthGuard } from './auth/guards/auth.guard';
 
 export const routes: Routes = [
@@ -39,9 +39,9 @@ export const routes: Routes = [
                 component: Category
             },
             {
-                path: 'category/product-detail/:id',
-                title: 'Product Detail',
-                component: ProductDetail
+                path: 'category/category-detail/:id',
+                title: 'Category Detail',
+                component: CategoryDetail
             },
             {
                 path: 'deshe',

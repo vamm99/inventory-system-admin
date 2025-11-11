@@ -7,10 +7,13 @@
       <input
         type="text"
         placeholder="Buscar categoría"
+        [value]="searchTerm"
+        (input)="onSearchInput($event)"
         class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
       />
     </form>
     <button
+      (click)="openModal()"
       class="bg-blue-500 hover:bg-blue-600 text-white py-1.5 px-3 text-sm rounded w-full sm:w-auto"
     >
       Agregar Categoría
@@ -19,23 +22,28 @@
 
   <!-- 📋 Tabla -->
   <div class="overflow-x-auto my-4">
-    <table class="min-w-full divide-y-2 divide-gray-200">
-      <thead class="ltr:text-left rtl:text-right">
-        <tr class="*:font-medium *:text-gray-900 text-center">
-          <th class="px-3 py-2 whitespace-nowrap">Nombre</th>
-          <th class="px-3 py-2 whitespace-nowrap">Fecha de creación</th>
-          <th class="px-3 py-2 whitespace-nowrap">Fecha de modificación</th>
-          <th class="px-3 py-2 whitespace-nowrap">Acciones</th>
+    <table class="min-w-full table-fixed border-collapse border border-gray-200">
+      <thead class="bg-gray-100">
+        <tr class="*:font-medium *:text-gray-900 text-left">
+          <th class="px-3 py-2 w-1/4 border border-gray-200">Nombre</th>
+          <th class="px-3 py-2 w-1/4 border border-gray-200">Fecha de creación</th>
+          <th class="px-3 py-2 w-1/4 border border-gray-200">Fecha de modificación</th>
+          <th class="px-3 py-2 w-1/4 border border-gray-200">Acciones</th>
         </tr>
       </thead>
 
-      <tbody class="divide-y divide-gray-200">
-        <tr class="*:text-gray-900 *:first:font-medium text-center">
-          <td class="px-3 py-2 whitespace-nowrap">Nandor the Relentless</td>
-          <td class="px-3 py-2 whitespace-nowrap">04/06/1262</td>
-          <td class="px-3 py-2 whitespace-nowrap">04/06/1262</td>
-          <td class="px-3 py-2 whitespace-nowrap">
-            <a routerLink="/admin/category/product-detail/1" class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
+      <tbody class="divide-y divide-gray-200 text-left">
+        <!-- 🔹 Iterar categorías -->
+        @for (category of categories; track category.id) {
+        <tr class="*:text-gray-900">
+          <td class="px-3 py-2 truncate">{{ category.name }}</td>
+          <td class="px-3 py-2">{{ category.createdAt | date : 'short' }}</td>
+          <td class="px-3 py-2">{{ category.updatedAt | date : 'short' }}</td>
+          <td class="px-3 py-2 space-x-2">
+            <a
+              [routerLink]="['/admin/category/category-detail', category.id]"
+              class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
               Ver detalles
             </a>
             <button class="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600">
@@ -43,47 +51,101 @@
             </button>
           </td>
         </tr>
+        }
+        <!-- 🔸 Si no hay datos -->
+        <tr *ngIf="categories.length === 0">
+          <td colspan="4" class="text-center text-gray-500 py-3">No hay categorías registradas</td>
+        </tr>
       </tbody>
     </table>
   </div>
 
-  <!-- 🔢 Paginación -->
+  <!-- 🔢 Paginación dinámica -->
   <div class="flex flex-col sm:flex-row justify-between items-center mt-6 gap-3">
-    <!-- Info -->
     <span class="text-sm text-gray-600">
-      Página <span class="font-semibold text-gray-800">1</span> de
-      <span class="font-semibold text-gray-800">10</span> —
-      Mostrando <span class="font-semibold text-gray-800">5</span> resultados
+      Página <span class="font-semibold text-gray-800">{{ currentPage }}</span> de
+      <span class="font-semibold text-gray-800">{{ totalPages }}</span> — Mostrando
+      <span class="font-semibold text-gray-800">{{ categories.length }}</span> de
+      <span class="font-semibold text-gray-800">{{ totalItems }}</span> resultados
     </span>
 
-    <!-- Controles -->
     <div class="flex items-center gap-1">
       <button
         class="px-3 py-1 text-sm text-gray-600 border rounded hover:bg-gray-100 disabled:opacity-50"
-        disabled
+        (click)="previousPage()"
+        [disabled]="currentPage === 1"
       >
         « Anterior
       </button>
-      <button
-        class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
-      >
-        1
+
+      <button class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600" disabled>
+        {{ currentPage }}
       </button>
+
       <button
         class="px-3 py-1 text-sm text-gray-600 border rounded hover:bg-gray-100"
-      >
-        2
-      </button>
-      <button
-        class="px-3 py-1 text-sm text-gray-600 border rounded hover:bg-gray-100"
-      >
-        3
-      </button>
-      <button
-        class="px-3 py-1 text-sm text-gray-600 border rounded hover:bg-gray-100"
+        (click)="nextPage()"
+        [disabled]="currentPage === totalPages"
       >
         Siguiente »
       </button>
     </div>
   </div>
 </div>
+
+<!-- 🧩 Modal para agregar categoría -->
+@if (showAddModal) {
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  <div class="bg-white rounded-lg shadow-lg w-11/12 sm:w-96 p-6 relative">
+    <button (click)="closeModal()" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800">
+      ✖
+    </button>
+
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">Registrar nueva categoría</h2>
+
+    <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1"> Nombre de la categoría </label>
+        <input
+          type="text"
+          formControlName="name"
+          placeholder="Ej: Electrónica"
+          class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+        <div
+          *ngIf="categoryForm.get('name')?.touched && categoryForm.get('name')?.invalid"
+          class="text-red-500 text-xs mt-1"
+        >
+          El nombre es obligatorio.
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button
+          type="button"
+          (click)="closeModal()"
+          class="px-3 py-1.5 text-sm border rounded text-gray-600 hover:bg-gray-100"
+        >
+          Cancelar
+        </button>
+        @if (isLoading) {
+        <button
+          type="button"
+          class="px-3 py-1.5 text-sm border rounded text-gray-600 hover:bg-gray-100"
+        >
+          Guardando...
+        </button>
+        } @if (!isLoading) {
+        <button
+          type="submit"
+          [disabled]="categoryForm.invalid"
+          class="px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+        >
+          Guardar
+        </button>
+        }
+      </div>
+    </form>
+  </div>
+</div>
+}
