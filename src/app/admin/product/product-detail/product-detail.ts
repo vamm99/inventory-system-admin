@@ -1,95 +1,145 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ProductService, ProductShare } from './service/product.service';
+import { ProductService } from '../service/product.service';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { ProviderService, ProviderShare } from '../provider/service/provider.service';
-import { CategoryService } from '../category/service/category.service';
+import { ProviderService, ProviderShare } from '../../provider/service/provider.service';
+import { CategoryService } from '../../category/service/category.service';
 
 @Component({
-  selector: 'app-product',
+  selector: 'app-product-detail',
   imports: [ReactiveFormsModule, CommonModule, RouterLink],
-  templateUrl: './product.html',
-  styleUrl: './product.css',
+  templateUrl: './product-detail.html',
+  styleUrl: './product-detail.css',
 })
-export class Product implements OnInit {
+export class ProductDetail implements OnInit {
+  private route = inject(ActivatedRoute);
   private productService = inject(ProductService);
   private providerService = inject(ProviderService);
   private categoryService = inject(CategoryService);
   private fb: FormBuilder = inject(FormBuilder);
+  private router = inject(Router);
 
   productForm!: FormGroup;
-  products: any[] = [];
   providers: any[] = [];
   categories: any[] = [];
-  
+  product: any = null;
+  id!: number;
+  submitted = false;
+  isLoading = false;
+  errorMessage = '';
+
   // 🔹 Listas filtradas para el dropdown
   filteredProviders: any[] = [];
   filteredCategories: any[] = [];
-  
+
   // 🔹 Control de visibilidad de dropdowns
   showProviderDropdown = false;
   showCategoryDropdown = false;
-  
-  submitted = false;
-  isLoading = false;
-  showAddModal = false;
-  errorMessage = '';
-  searchTerm = '';
-  searchType: 'name' | 'barcode' = 'name';
 
   // 🔹 Búsquedas separadas para el modal
   providerSearchTerm = '';
   categorySearchTerm = '';
 
-  // 🔹 Paginación
-  currentPage = 1;
-  limit = 10;
-  totalPages = 1;
-  totalItems = 0;
-
   ngOnInit(): void {
+    this.id = this.route.snapshot.params['id'];
     this.initForm();
-    this.loadProducts();
+    this.loadProduct();
+    this.loadProviders();
+    this.loadCategories();
   }
 
   initForm(): void {
     this.productForm = this.fb.group({
-      name: ['', Validators.required],
-      barcode: ['', Validators.required],
-      categoryId: ['', Validators.required],
-      providerId: ['', Validators.required],
-      description: ['', Validators.required],
-      coste: ['', Validators.required],
-      price: ['', Validators.required],
-      stock: ['', Validators.required],
-      unit: ['', Validators.required],
-      expiredAt: ['', Validators.required],
+      name: ['', [Validators.required, Validators.minLength(3)]],
+      barcode: ['', [Validators.required]],
+      description: ['', [Validators.required, Validators.minLength(3)]],
+      categoryId: ['', [Validators.required]],
+      providerId: ['', [Validators.required]],
+      coste: ['', [Validators.required]],
+      price: ['', [Validators.required]],
+      stock: ['', [Validators.required]],
+      unit: ['', [Validators.required]],
+      expiredAt: ['', [Validators.required]],
+      createdAt: [{ value: '', disabled: true }],
+      updatedAt: [{ value: '', disabled: true }]
     });
   }
 
-  loadProducts(page: number = this.currentPage): void {
+  loadProduct(): void {
     this.isLoading = true;
-    this.productService.getAllProducts(page, this.limit).subscribe({
+    this.productService.getProductById(this.id).subscribe({
       next: (data) => {
-        this.products = data.data;
-        if (data.pagination) {
-          this.currentPage = data.pagination.page;
-          this.limit = data.pagination.limit;
-          this.totalItems = data.pagination.total;
-          this.totalPages = data.pagination.lastPage;
-        }
+        this.product = data.data;
+        
+        // Formatear fechas para input type="date"
+        const expiredDate = data.data.expiredAt ? data.data.expiredAt.split('T')[0] : '';
+        const createdDate = data.data.createdAt ? new Date(data.data.createdAt).toLocaleString('es-ES') : '';
+        const updatedDate = data.data.updatedAt ? new Date(data.data.updatedAt).toLocaleString('es-ES') : '';
+        
+        this.productForm.patchValue({
+          name: data.data.name,
+          barcode: data.data.barcode,
+          description: data.data.description,
+          categoryId: data.data.category?.id || '',
+          providerId: data.data.provider?.id || '',
+          coste: data.data.coste,
+          price: data.data.price,
+          stock: data.data.stock,
+          unit: data.data.unit,
+          expiredAt: expiredDate,
+          createdAt: createdDate,
+          updatedAt: updatedDate
+        });
+
+        // Inicializar términos de búsqueda con nombres actuales
+        this.providerSearchTerm = data.data.provider?.name || '';
+        this.categorySearchTerm = data.data.category?.name || '';
+
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = error.message;
         this.isLoading = false;
-      },
+        this.errorMessage = error.error?.message || 'Error al cargar el producto';
+      }
     });
   }
 
-  // 🔹 Cargar proveedores al abrir el modal
+  onSubmit(): void {
+    this.submitted = true;
+    if (this.productForm.invalid) return;
+    
+    this.isLoading = true;
+    const formData = this.productForm.getRawValue();
+    
+    // Preparar datos para enviar
+    const updateData: any = {
+      name: formData.name,
+      barcode: formData.barcode,
+      description: formData.description,
+      categoryId: formData.categoryId,
+      providerId: formData.providerId,
+      coste: formData.coste,
+      price: formData.price,
+      stock: formData.stock,
+      unit: formData.unit,
+      expiredAt: formData.expiredAt
+    };
+
+    this.productService.updateProduct(this.id, updateData).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.router.navigate(['/admin/product']);
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Error al actualizar el producto';
+        this.isLoading = false;
+      }
+    });
+  }
+
   loadProviders(): void {
     this.providerService.getAllProviders().subscribe({
       next: (response) => {
@@ -102,7 +152,6 @@ export class Product implements OnInit {
     });
   }
 
-  // 🔹 Cargar categorías al abrir el modal
   loadCategories(): void {
     this.categoryService.getAllCategories().subscribe({
       next: (response) => {
@@ -111,71 +160,6 @@ export class Product implements OnInit {
       },
       error: (error) => {
         this.errorMessage = 'Error al cargar categorías.';
-      },
-    });
-  }
-
-  nextPage(): void {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-      this.loadProducts(this.currentPage);
-    }
-  }
-
-  previousPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      this.loadProducts(this.currentPage);
-    }
-  }
-
-  onSubmit(): void {
-    this.submitted = true;
-    if (this.productForm.invalid) return;
-
-    this.isLoading = true;
-    const productData = this.productForm.value;
-
-    this.productService.createProduct(productData).subscribe({
-      next: () => {
-        this.showAddModal = false;
-        this.loadProducts();
-        this.productForm.reset();
-        this.submitted = false;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.errorMessage = error.message;
-        this.isLoading = false;
-      },
-    });
-  }
-
-  searchProducts(): void {
-    const term = this.searchTerm.trim();
-
-    if (!term) {
-      this.loadProducts(1);
-      return;
-    }
-
-    this.isLoading = true;
-
-    const productShare: ProductShare = {
-      name: term,
-      barcode: term,
-    };
-
-    this.productService.shareProductByName(productShare).subscribe({
-      next: (response) => {
-        this.products = response.data;
-        this.totalItems = response.pagination?.total || 0;
-        this.totalPages = response.pagination?.lastPage || 1;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.errorMessage = error.message;
-        this.isLoading = false;
       },
     });
   }
@@ -230,24 +214,16 @@ export class Product implements OnInit {
     });
   }
 
-  // 🔹 Seleccionar proveedor del dropdown
   selectProvider(provider: any): void {
     this.productForm.patchValue({ providerId: provider.id });
     this.providerSearchTerm = provider.name;
     this.showProviderDropdown = false;
   }
 
-  // 🔹 Seleccionar categoría del dropdown
   selectCategory(category: any): void {
     this.productForm.patchValue({ categoryId: category.id });
     this.categorySearchTerm = category.name;
     this.showCategoryDropdown = false;
-  }
-
-  onSearchInput(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.searchTerm = input.value;
-    this.searchProducts();
   }
 
   onProviderSearchInput(event: Event): void {
@@ -262,33 +238,19 @@ export class Product implements OnInit {
     this.searchCategories();
   }
 
-  onSearchTypeChange(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    this.searchType = select.value as 'name' | 'barcode';
-    if (this.searchTerm) {
-      this.searchProducts();
+  deleteProduct(): void {
+    if (confirm('¿Estás seguro de eliminar este producto?')) {
+      this.isLoading = true;
+      this.productService.deleteProduct(this.id).subscribe({
+        next: () => {
+          this.router.navigate(['/admin/product']);
+        },
+        error: (error) => {
+          this.errorMessage = error.error?.message || 'Error al eliminar el producto';
+          this.isLoading = false;
+        }
+      });
     }
-  }
-
-  openModal(): void {
-    this.showAddModal = true;
-    this.loadProviders();
-    this.loadCategories();
-  }
-
-  closeModal(): void {
-    this.showAddModal = false;
-    this.resetForm();
-  }
-
-  resetForm(): void {
-    this.productForm.reset();
-    this.submitted = false;
-    this.errorMessage = '';
-    this.providerSearchTerm = '';
-    this.categorySearchTerm = '';
-    this.showProviderDropdown = false;
-    this.showCategoryDropdown = false;
   }
 
   // 🔹 Obtener clase de estilo para stock
@@ -299,7 +261,6 @@ export class Product implements OnInit {
     return 'bg-green-100 text-green-700 font-semibold';
   }
 
-  // 🔹 Obtener ícono para stock
   getStockIcon(stock: number): string {
     if (stock === 0) return '⛔';
     if (stock <= 5) return '⚠️';
@@ -307,7 +268,6 @@ export class Product implements OnInit {
     return '✅';
   }
 
-  // 🔹 Obtener clase de estilo para fecha de vencimiento
   getExpiryClass(expiredAt: string): string {
     const today = new Date();
     const expiryDate = new Date(expiredAt);
@@ -320,7 +280,6 @@ export class Product implements OnInit {
     return 'bg-blue-100 text-blue-700';
   }
 
-  // 🔹 Obtener ícono para fecha de vencimiento
   getExpiryIcon(expiredAt: string): string {
     const today = new Date();
     const expiryDate = new Date(expiredAt);
@@ -333,7 +292,6 @@ export class Product implements OnInit {
     return '🟢';
   }
 
-  // 🔹 Obtener texto del estado de vencimiento
   getExpiryStatus(expiredAt: string): string {
     const today = new Date();
     const expiryDate = new Date(expiredAt);
@@ -345,6 +303,6 @@ export class Product implements OnInit {
     if (diffDays === 1) return 'Vence mañana';
     if (diffDays <= 7) return `Vence en ${diffDays} días`;
     if (diffDays <= 30) return `Vence en ${diffDays} días`;
-    return `${diffDays} días`;
+    return `${diffDays} días restantes`;
   }
 }

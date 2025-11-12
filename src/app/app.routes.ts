@@ -12,6 +12,7 @@ import { Nofound } from './admin/nofound/nofound';
 import { CategoryDetail } from './admin/category/category-detail/category-detail';
 import { AuthGuard } from './auth/guards/auth.guard';
 import { Providerdetail } from './admin/provider/provider-detail/providerdetail';
+import { ProductDetail } from './admin/product/product-detail/product-detail';
 
 export const routes: Routes = [
     {
@@ -58,6 +59,11 @@ export const routes: Routes = [
                 path: 'product',
                 title: 'Product',
                 component: Product
+            },
+            {
+                path: 'product/product-detail/:id',
+                title: 'Product Detail',
+                component: ProductDetail
             },
             {
                 path: 'provider',

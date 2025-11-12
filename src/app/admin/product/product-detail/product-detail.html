@@ -1,0 +1,335 @@
+<div class="max-w-7xl mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="mb-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">Detalle del Producto</h1>
+                @if (product) {
+                <p class="text-gray-600 mt-1">{{ product.name }}</p>
+                }
+            </div>
+            <a routerLink="/admin/product" 
+                class="inline-flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+                ← Regresar
+            </a>
+        </div>
+    </div>
+
+    <!-- Mensajes de error -->
+    @if (errorMessage) {
+    <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+        <p class="text-red-700 text-sm">{{ errorMessage }}</p>
+    </div>
+    }
+
+    <!-- Loading -->
+    @if (isLoading && !product) {
+    <div class="flex justify-center items-center py-12">
+        <div class="text-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+            <p class="mt-4 text-gray-600">Cargando producto...</p>
+        </div>
+    </div>
+    }
+
+    <!-- Contenido principal -->
+    @if (!isLoading || product) {
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Columna izquierda: Información destacada -->
+        <div class="lg:col-span-1 space-y-4">
+            
+            <!-- Card de Estado del Stock -->
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Estado del Stock</h3>
+                @if (product) {
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600">Cantidad:</span>
+                        <span [class]="'px-3 py-1 rounded-full text-sm font-semibold ' + getStockClass(product.stock)">
+                            {{ getStockIcon(product.stock) }} {{ product.stock }} {{ product.unit }}
+                        </span>
+                    </div>
+                    <div class="pt-3 border-t">
+                        <div class="text-sm text-gray-600 mb-1">Costo unitario:</div>
+                        <div class="text-2xl font-bold text-gray-700">${{ product.coste }}</div>
+                    </div>
+                    <div class="pt-3 border-t">
+                        <div class="text-sm text-gray-600 mb-1">Precio de venta:</div>
+                        <div class="text-2xl font-bold text-green-600">${{ product.price }}</div>
+                    </div>
+                    <div class="pt-3 border-t">
+                        <div class="text-sm text-gray-600 mb-1">Margen de ganancia:</div>
+                        <div class="text-lg font-semibold text-blue-600">
+                            {{ ((product.price - product.coste) / product.coste * 100).toFixed(1) }}%
+                        </div>
+                    </div>
+                </div>
+                }
+            </div>
+
+            <!-- Card de Vencimiento -->
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Fecha de Vencimiento</h3>
+                @if (product) {
+                <div class="space-y-3">
+                    <div [class]="'p-4 rounded-lg text-center ' + getExpiryClass(product.expiredAt)">
+                        <div class="text-3xl mb-2">{{ getExpiryIcon(product.expiredAt) }}</div>
+                        <div class="font-semibold">{{ product.expiredAt.split('T')[0] }}</div>
+                        <div class="text-sm mt-1">{{ getExpiryStatus(product.expiredAt) }}</div>
+                    </div>
+                </div>
+                }
+            </div>
+
+            <!-- Card de Información Adicional -->
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Información Adicional</h3>
+                @if (product) {
+                <div class="space-y-3 text-sm">
+                    <div>
+                        <div class="text-gray-600">Código de barras:</div>
+                        <div class="font-mono font-semibold text-gray-800">{{ product.barcode }}</div>
+                    </div>
+                    <div class="pt-2 border-t">
+                        <div class="text-gray-600">Proveedor:</div>
+                        <div class="font-medium text-gray-800">{{ product.provider?.name }}</div>
+                    </div>
+                    <div class="pt-2 border-t">
+                        <div class="text-gray-600">Categoría:</div>
+                        <div class="font-medium text-gray-800">{{ product.category?.name }}</div>
+                    </div>
+                    <div class="pt-2 border-t">
+                        <div class="text-gray-600">Creado:</div>
+                        <div class="text-gray-800">{{ productForm.get('createdAt')?.value }}</div>
+                    </div>
+                    <div class="pt-2 border-t">
+                        <div class="text-gray-600">Última actualización:</div>
+                        <div class="text-gray-800">{{ productForm.get('updatedAt')?.value }}</div>
+                    </div>
+                </div>
+                }
+            </div>
+        </div>
+
+        <!-- Columna derecha: Formulario de edición -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+                <h2 class="text-xl font-semibold text-gray-800 mb-6">Editar Producto</h2>
+
+                <form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="space-y-5">
+                    
+                    <!-- Grid de campos principales -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        
+                        <!-- Nombre -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Nombre del producto
+                            </label>
+                            <input 
+                                type="text" 
+                                formControlName="name" 
+                                placeholder="Ej: Laptop HP"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent" />
+                            @if (productForm.get('name')?.touched && productForm.get('name')?.invalid) {
+                            <div class="text-red-500 text-xs mt-1">El nombre es obligatorio (mínimo 3 caracteres).</div>
+                            }
+                        </div>
+
+                        <!-- Barcode -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Código de barras
+                            </label>
+                            <input 
+                                type="text" 
+                                formControlName="barcode" 
+                                placeholder="Ej: 123456789"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent" />
+                            @if (productForm.get('barcode')?.touched && productForm.get('barcode')?.invalid) {
+                            <div class="text-red-500 text-xs mt-1">El código de barras es obligatorio.</div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Descripción (full width) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Descripción
+                        </label>
+                        <textarea 
+                            formControlName="description" 
+                            placeholder="Descripción detallada del producto" 
+                            rows="3"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"></textarea>
+                        @if (productForm.get('description')?.touched && productForm.get('description')?.invalid) {
+                        <div class="text-red-500 text-xs mt-1">La descripción es obligatoria (mínimo 3 caracteres).</div>
+                        }
+                    </div>
+
+                    <!-- Categoría con dropdown -->
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Categoría
+                        </label>
+                        <input 
+                            type="text" 
+                            placeholder="Buscar categoría..." 
+                            [value]="categorySearchTerm" 
+                            (input)="onCategorySearchInput($event)"
+                            (focus)="showCategoryDropdown = true"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent" />
+
+                        @if (showCategoryDropdown && filteredCategories.length > 0) {
+                        <div class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                            @for (category of filteredCategories; track category.id) {
+                            <div 
+                                (click)="selectCategory(category)"
+                                class="px-4 py-3 hover:bg-blue-50 cursor-pointer text-sm border-b border-gray-100 last:border-b-0 transition-colors">
+                                <div class="font-medium text-gray-900">{{ category.name }}</div>
+                            </div>
+                            }
+                        </div>
+                        }
+
+                        @if (productForm.get('categoryId')?.touched && productForm.get('categoryId')?.invalid) {
+                        <div class="text-red-500 text-xs mt-1">La categoría es obligatoria.</div>
+                        }
+                    </div>
+
+                    <!-- Proveedor con dropdown -->
+                    <div class="relative">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Proveedor
+                        </label>
+                        <input 
+                            type="text" 
+                            placeholder="Buscar proveedor..." 
+                            [value]="providerSearchTerm" 
+                            (input)="onProviderSearchInput($event)"
+                            (focus)="showProviderDropdown = true"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent" />
+
+                        @if (showProviderDropdown && filteredProviders.length > 0) {
+                        <div class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                            @for (provider of filteredProviders; track provider.id) {
+                            <div 
+                                (click)="selectProvider(provider)"
+                                class="px-4 py-3 hover:bg-blue-50 cursor-pointer text-sm border-b border-gray-100 last:border-b-0 transition-colors">
+                                <div class="font-medium text-gray-900">{{ provider.name }}</div>
+                                <div class="text-xs text-gray-500">{{ provider.email }} | {{ provider.phone }}</div>
+                            </div>
+                            }
+                        </div>
+                        }
+
+                        @if (productForm.get('providerId')?.touched && productForm.get('providerId')?.invalid) {
+                        <div class="text-red-500 text-xs mt-1">El proveedor es obligatorio.</div>
+                        }
+                    </div>
+
+                    <!-- Grid de campos numéricos -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        
+                        <!-- Costo -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Costo ($)
+                            </label>
+                            <input 
+                                type="number" 
+                                formControlName="coste" 
+                                placeholder="0.00" 
+                                step="0.01"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent" />
+                            @if (productForm.get('coste')?.touched && productForm.get('coste')?.invalid) {
+                            <div class="text-red-500 text-xs mt-1">El costo es obligatorio.</div>
+                            }
+                        </div>
+
+                        <!-- Precio -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Precio de venta ($)
+                            </label>
+                            <input 
+                                type="number" 
+                                formControlName="price" 
+                                placeholder="0.00" 
+                                step="0.01"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent" />
+                            @if (productForm.get('price')?.touched && productForm.get('price')?.invalid) {
+                            <div class="text-red-500 text-xs mt-1">El precio es obligatorio.</div>
+                            }
+                        </div>
+
+                        <!-- Stock -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Stock
+                            </label>
+                            <input 
+                                type="number" 
+                                formControlName="stock" 
+                                placeholder="0"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent" />
+                            @if (productForm.get('stock')?.touched && productForm.get('stock')?.invalid) {
+                            <div class="text-red-500 text-xs mt-1">El stock es obligatorio.</div>
+                            }
+                        </div>
+
+                        <!-- Unidad -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Unidad de medida
+                            </label>
+                            <input 
+                                type="text" 
+                                formControlName="unit" 
+                                placeholder="Ej: kg, unidades, litros"
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent" />
+                            @if (productForm.get('unit')?.touched && productForm.get('unit')?.invalid) {
+                            <div class="text-red-500 text-xs mt-1">La unidad es obligatoria.</div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Fecha de vencimiento -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Fecha de vencimiento
+                        </label>
+                        <input 
+                            type="date" 
+                            formControlName="expiredAt"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent" />
+                        @if (productForm.get('expiredAt')?.touched && productForm.get('expiredAt')?.invalid) {
+                        <div class="text-red-500 text-xs mt-1">La fecha de vencimiento es obligatoria.</div>
+                        }
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t">
+                        @if (isLoading) {
+                        <button 
+                            type="button" 
+                            disabled
+                            class="flex-1 px-6 py-3 bg-gray-400 text-white rounded-lg cursor-not-allowed font-medium">
+                            Guardando cambios...
+                        </button>
+                        } @else {
+                        <button 
+                            type="submit" 
+                            [disabled]="productForm.invalid"
+                            class="flex-1 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors">
+                            💾 Guardar cambios
+                        </button>
+                        }
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    }
+</div>

@@ -1,30 +1,232 @@
-<div>
-  <h1 class="text-2xl font-bold text-gray-800 my-4">Detalle de la categoría</h1>
-  <div class="flex gap-2 my-4">
-    <a routerLink="/admin/category" class="text-blue-500">Regresar</a>
+<div class="max-w-7xl mx-auto px-4 py-6">
+  <!-- Header -->
+  <div class="mb-6">
+      <div class="flex items-center justify-between">
+          <div>
+              <h1 class="text-3xl font-bold text-gray-800">Detalle de la Categoría</h1>
+              @if (category) {
+              <p class="text-gray-600 mt-1">{{ category.name }}</p>
+              }
+          </div>
+          <a routerLink="/admin/category" 
+              class="inline-flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors">
+              ← Regresar
+          </a>
+      </div>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div class="block rounded-md border border-gray-300 p-4 shadow-sm sm:p-6">
-      <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4" action="#">
-        <div class="flex flex-col gap-2">
-          <label for="name">Nombre</label>
-          <input type="text" id="name" name="name" class="border border-gray-300 rounded px-2 py-1" formControlName="name">
-        </div>
-        <div class="flex flex-col gap-2">
-          <label for="name">Fecha de creación</label>
-          <input type="text" id="name" name="name" class="border border-gray-300 rounded px-2 py-1" formControlName="createdAt">
-        </div>
-        <div class="flex flex-col gap-2">
-          <label for="name">Fecha de modificación</label>
-          <input type="text" id="name" name="name" class="border border-gray-300 rounded px-2 py-1" formControlName="updatedAt">
-        </div>
-        @if (isLoading) {
-          <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Guardando...</button>
-        } @if (!isLoading) {
-          <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Guardar</button>
-        }
-      </form>
-    </div>
+  <!-- Mensajes de error -->
+  @if (errorMessage) {
+  <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+      <p class="text-red-700 text-sm">{{ errorMessage }}</p>
   </div>
+  }
+
+  <!-- Loading -->
+  @if (isLoading && !category) {
+  <div class="flex justify-center items-center py-12">
+      <div class="text-center">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p class="mt-4 text-gray-600">Cargando categoría...</p>
+      </div>
+  </div>
+  }
+
+  <!-- Contenido principal -->
+  @if (!isLoading || category) {
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Columna izquierda: Información destacada -->
+      <div class="lg:col-span-1 space-y-4">
+          
+          <!-- Card de Información de la Categoría -->
+          <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                  🏷️ Información de la Categoría
+              </h3>
+              @if (category) {
+              <div class="space-y-4">
+                  <!-- Ícono visual de la categoría -->
+                  <div [class]="'p-6 rounded-xl text-center ' + getCategoryColor()">
+                      <div class="text-6xl mb-3">{{ getCategoryIcon() }}</div>
+                      <div class="text-xl font-bold">{{ category.name }}</div>
+                  </div>
+                  
+                  <!-- ID -->
+                  <div class="p-3 bg-gray-50 rounded-lg">
+                      <div class="text-xs text-gray-600 mb-1">ID de categoría</div>
+                      <div class="font-mono font-semibold text-gray-800">#{{ category.id }}</div>
+                  </div>
+              </div>
+              }
+          </div>
+
+          <!-- Card de Información del Sistema -->
+          <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                  🔧 Información del Sistema
+              </h3>
+              @if (category) {
+              <div class="space-y-3 text-sm">
+                  <div>
+                      <div class="text-gray-600 mb-1">Categoría creada el:</div>
+                      <div class="text-gray-800">{{ categoryForm.get('createdAt')?.value }}</div>
+                  </div>
+                  <div class="pt-2 border-t">
+                      <div class="text-gray-600 mb-1">Última actualización:</div>
+                      <div class="text-gray-800">{{ categoryForm.get('updatedAt')?.value }}</div>
+                  </div>
+              </div>
+              }
+          </div>
+      </div>
+
+      <!-- Columna derecha: Formulario de edición -->
+      <div class="lg:col-span-2">
+          <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
+              <h2 class="text-xl font-semibold text-gray-800 mb-6">Editar Categoría</h2>
+
+              <form [formGroup]="categoryForm" (ngSubmit)="onSubmit()" class="space-y-6">
+                  
+                  <!-- Nombre de la categoría -->
+                  <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-2">
+                          🏷️ Nombre de la categoría
+                      </label>
+                      <input 
+                          type="text" 
+                          formControlName="name" 
+                          placeholder="Ej: Electrónica, Alimentos, Ropa..."
+                          class="w-full border border-gray-300 rounded-lg px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent" />
+                      
+                      @if (categoryForm.get('name')?.touched && categoryForm.get('name')?.invalid) {
+                      <div class="text-red-500 text-xs mt-2">
+                          @if (categoryForm.get('name')?.errors?.['required']) {
+                              El nombre de la categoría es obligatorio.
+                          }
+                          @if (categoryForm.get('name')?.errors?.['minlength']) {
+                              El nombre debe tener al menos 3 caracteres.
+                          }
+                          @if (categoryForm.get('name')?.errors?.['maxlength']) {
+                              El nombre no puede exceder 50 caracteres.
+                          }
+                      </div>
+                      }
+                      
+                      @if (categoryForm.get('name')?.valid && categoryForm.get('name')?.value) {
+                      <div class="text-green-600 text-xs mt-2 flex items-center gap-1">
+                          ✓ Nombre válido
+                      </div>
+                      }
+
+                      <!-- Vista previa del ícono -->
+                      @if (category && categoryForm.get('name')?.value) {
+                      <div class="mt-4 p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                          <p class="text-xs text-gray-600 mb-2">Vista previa:</p>
+                          <div [class]="'inline-flex items-center gap-2 px-4 py-2 rounded-full ' + getCategoryColor()">
+                              <span class="text-2xl">{{ getCategoryIcon() }}</span>
+                              <span class="font-semibold">{{ categoryForm.get('name')?.value }}</span>
+                          </div>
+                      </div>
+                      }
+                  </div>
+
+                  <!-- Separador visual -->
+                  <div class="border-t pt-6">
+                      <h3 class="text-sm font-semibold text-gray-700 mb-4">📅 Información del sistema</h3>
+                      
+                      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <!-- Fecha de creación -->
+                          <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-2">
+                                  Fecha de registro
+                              </label>
+                              <input 
+                                  type="text" 
+                                  formControlName="createdAt"
+                                  readonly
+                                  class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-gray-50 text-gray-600 cursor-not-allowed" />
+                          </div>
+
+                          <!-- Fecha de modificación -->
+                          <div>
+                              <label class="block text-sm font-medium text-gray-700 mb-2">
+                                  Última modificación
+                              </label>
+                              <input 
+                                  type="text" 
+                                  formControlName="updatedAt"
+                                  readonly
+                                  class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-sm bg-gray-50 text-gray-600 cursor-not-allowed" />
+                          </div>
+                      </div>
+                  </div>
+
+                  <!-- Sección de ayuda -->
+                  <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <h4 class="text-sm font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                          💡 Consejos para nombrar categorías
+                      </h4>
+                      <ul class="text-xs text-blue-700 space-y-1 ml-4 list-disc">
+                          <li>Usa nombres descriptivos y cortos</li>
+                          <li>Evita abreviaturas confusas</li>
+                          <li>Mantén la consistencia en mayúsculas/minúsculas</li>
+                          <li>Considera usar nombres en singular o plural de forma consistente</li>
+                      </ul>
+                  </div>
+
+                  <!-- Ejemplos de categorías -->
+                  <div class="bg-gray-50 rounded-lg p-4">
+                      <h4 class="text-sm font-semibold text-gray-700 mb-3">📋 Ejemplos de categorías comunes:</h4>
+                      <div class="flex flex-wrap gap-2">
+                          <span class="inline-flex items-center gap-1 px-3 py-1 bg-white border border-gray-200 rounded-full text-xs">
+                              🍎 Frutas
+                          </span>
+                          <span class="inline-flex items-center gap-1 px-3 py-1 bg-white border border-gray-200 rounded-full text-xs">
+                              🍽️ Alimentos
+                          </span>
+                          <span class="inline-flex items-center gap-1 px-3 py-1 bg-white border border-gray-200 rounded-full text-xs">
+                              🥬 Verduras
+                          </span>
+                          <span class="inline-flex items-center gap-1 px-3 py-1 bg-white border border-gray-200 rounded-full text-xs">
+                              🍖 Carnes
+                          </span>
+                          <span class="inline-flex items-center gap-1 px-3 py-1 bg-white border border-gray-200 rounded-full text-xs">
+                              🍡 Carnes frias
+                          </span>
+                          <span class="inline-flex items-center gap-1 px-3 py-1 bg-white border border-gray-200 rounded-full text-xs">
+                              🥛 Lacteos
+                          </span>
+                          <span class="inline-flex items-center gap-1 px-3 py-1 bg-white border border-gray-200 rounded-full text-xs">
+                              🍞 Panadería
+                          </span>
+                          <span class="inline-flex items-center gap-1 px-3 py-1 bg-white border border-gray-200 rounded-full text-xs">
+                              🍸 Bebidas
+                          </span>
+                      </div>
+                  </div>
+
+                  <!-- Botones de acción -->
+                  <div class="flex flex-col sm:flex-row gap-3 pt-6 border-t">
+                      @if (isLoading) {
+                      <button 
+                          type="button" 
+                          disabled
+                          class="flex-1 px-6 py-3 bg-gray-400 text-white rounded-lg cursor-not-allowed font-medium">
+                          Guardando cambios...
+                      </button>
+                      } @else {
+                      <button 
+                          type="submit" 
+                          [disabled]="categoryForm.invalid"
+                          class="flex-1 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors">
+                          💾 Guardar cambios
+                      </button>
+                      }
+                  </div>
+              </form>
+          </div>
+      </div>
+  </div>
+  }
 </div>

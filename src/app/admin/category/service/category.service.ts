@@ -11,7 +11,7 @@ interface Pagination {
     lastPage: number;
 }
 
-interface Category {
+export interface Category {
     id: number;
     name: string;
     createdAt: string;
