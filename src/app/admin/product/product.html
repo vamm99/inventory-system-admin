@@ -4,7 +4,7 @@
     <!-- 🔍 Buscador + Botón -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div class="flex w-full sm:w-3/5">
-            <input type="text" placeholder="Buscar producto" [value]="searchTerm" (input)="onSearchInput($event)"
+            <input type="text" placeholder="Buscar producto por nombre o barcode" [value]="searchTerm" (input)="onSearchInput($event)"
                 class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
         </div>
         <button (click)="openModal()"
@@ -40,7 +40,7 @@
                     <td class="px-3 py-2 text-gray-600">{{ product.description }}</td>
                     <td class="px-3 py-2">{{ product.provider.name }}</td>
                     <td class="px-3 py-2">{{ product.category.name }}</td>
-                    <td class="px-3 py-2 font-semibold text-gray-700">${{ product.cost }}</td>
+                    <td class="px-3 py-2 font-semibold text-gray-700">${{ product.coste }}</td>
                     <td class="px-3 py-2 font-semibold text-green-600">${{ product.price }}</td>
 
                     <!-- 🎨 Stock con badge atractivo -->
