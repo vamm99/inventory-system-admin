@@ -13,6 +13,8 @@ import { CategoryDetail } from './admin/category/category-detail/category-detail
 import { AuthGuard } from './auth/guards/auth.guard';
 import { Providerdetail } from './admin/provider/provider-detail/providerdetail';
 import { ProductDetail } from './admin/product/product-detail/product-detail';
+import { Detail } from './admin/provider/provider-detail/detail/detail';
+import { ProviderProducts } from './admin/provider/provider-detail/provider-products/provider-products';
 
 export const routes: Routes = [
     {
@@ -73,7 +75,22 @@ export const routes: Routes = [
             {
                 path: 'provider/provider-detail/:id',
                 title: 'Provider Detail',
-                component: Providerdetail
+                component: Providerdetail,
+                children: [
+                    {
+                        path: 'products',
+                        component: ProviderProducts,
+                    },
+                    {
+                        path: 'detail',
+                        component: Detail,
+                    },
+                    {
+                        path: '',
+                        redirectTo: 'detail',
+                        pathMatch: 'full'
+                    }
+                ]
             },
             {
                 path: '',

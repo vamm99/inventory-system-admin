@@ -1,20 +1,20 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { Router, RouterLink, ActivatedRoute } from '@angular/router';
+import { RouterLink, ActivatedRoute } from '@angular/router';
 import { ProviderService } from '../service/provider.service';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { RouterOutlet } from '@angular/router';
+import { RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-providerdetail',
-  imports: [RouterLink, ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, RouterLink, RouterOutlet, RouterLinkActive],
   templateUrl: './providerdetail.html',
   styleUrl: './providerdetail.css',
 })
 export class Providerdetail implements OnInit {
   private route = inject(ActivatedRoute);
   private providerService = inject(ProviderService);
-  private fb: FormBuilder = inject(FormBuilder);
-  private router = inject(Router);
 
   providerForm!: FormGroup;
   provider: any = null;
@@ -25,19 +25,7 @@ export class Providerdetail implements OnInit {
 
   ngOnInit(): void {
     this.id = this.route.snapshot.params['id'];
-    this.initForm();
     this.loadProvider();
-  }
-
-  initForm(): void {
-    this.providerForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
-      email: ['', [Validators.required, Validators.email]],
-      phone: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
-      address: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
-      createdAt: [{ value: '', disabled: true }],
-      updatedAt: [{ value: '', disabled: true }]
-    });
   }
 
   loadProvider(): void {
@@ -66,47 +54,6 @@ export class Providerdetail implements OnInit {
         this.isLoading = false;
       }
     });
-  }
-
-  onSubmit(): void {
-    this.submitted = true;
-    if (this.providerForm.invalid) return;
-    
-    this.isLoading = true;
-    const formData = this.providerForm.getRawValue();
-    
-    const updateData: any = {
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      address: formData.address
-    };
-
-    this.providerService.updateProvider(this.id, updateData).subscribe({
-      next: () => {
-        this.isLoading = false;
-        this.router.navigate(['/admin/provider']);
-      },
-      error: (error) => {
-        this.errorMessage = error.error?.message || 'Error al actualizar el proveedor';
-        this.isLoading = false;
-      }
-    });
-  }
-
-  deleteProvider(): void {
-    if (confirm('¿Estás seguro de eliminar este proveedor? Esta acción no se puede deshacer.')) {
-      this.isLoading = true;
-      this.providerService.deleteProvider(this.id).subscribe({
-        next: () => {
-          this.router.navigate(['/admin/provider']);
-        },
-        error: (error) => {
-          this.errorMessage = error.error?.message || 'Error al eliminar el proveedor';
-          this.isLoading = false;
-        }
-      });
-    }
   }
 
   // 🔹 Validar formato de email
