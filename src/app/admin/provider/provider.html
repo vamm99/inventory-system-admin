@@ -1,1 +1,153 @@
-<p>provider works!</p>
+<div>
+    <h1 class="text-2xl font-bold text-gray-800 my-4">Proveedor</h1>
+
+    <!-- 🔍 Buscador + Botón -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <form class="flex w-full sm:w-3/5">
+            <input type="text" placeholder="Buscar proveedor" [value]="searchTerm" (input)="onSearchInput($event)"
+                class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        </form>
+        <button (click)="openModal()"
+            class="bg-blue-500 hover:bg-blue-600 text-white py-1.5 px-3 text-sm rounded w-full sm:w-auto">
+            Agregar Proveedor
+        </button>
+    </div>
+
+    <!-- 📋 Tabla -->
+    <div class="overflow-x-auto my-4">
+        <table class="min-w-full table-fixed border-collapse border border-gray-200">
+            <thead class="bg-gray-100">
+                <tr class="*:font-medium *:text-gray-900 text-left">
+                    <th class="px-3 py-2 w-1/4 border border-gray-200">Nombre</th>
+                    <th class="px-3 py-2 w-1/4 border border-gray-200">Email</th>
+                    <th class="px-3 py-2 w-1/4 border border-gray-200">Telefono</th>
+                    <th class="px-3 py-2 w-1/4 border border-gray-200">Dirección</th>
+                    <th class="px-3 py-2 w-44 border border-gray-200 text-center">Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody class="divide-y divide-gray-200 text-left">
+                <!-- 🔹 Iterar categorías -->
+                @for (provider of providers; track provider.id) {
+                <tr class="*:text-gray-900">
+                    <td class="px-3 py-2 truncate">{{ provider.name }}</td>
+                    <td class="px-3 py-2">{{ provider.email }}</td>
+                    <td class="px-3 py-2">{{ provider.phone }}</td>
+                    <td class="px-3 py-2">{{ provider.address }}</td>
+                    <td class="px-3 py-2 space-x-2 text-center whitespace-nowrap">
+                        <a [routerLink]="['/admin/provider/provider-detail', provider.id]"
+                            class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
+                            Ver detalles
+                        </a>
+                    </td>
+
+                </tr>
+                }
+                <!-- 🔸 Si no hay datos -->
+                @if (providers.length === 0) {
+                <tr>
+                    <td colspan="5" class="text-center text-gray-500 py-3">No hay proveedores registrados</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 🔢 Paginación dinámica -->
+    <div class="flex flex-col sm:flex-row justify-between items-center mt-6 gap-3">
+        <span class="text-sm text-gray-600">
+            Página <span class="font-semibold text-gray-800">{{ currentPage }}</span> de
+            <span class="font-semibold text-gray-800">{{ totalPages }}</span> — Mostrando
+            <span class="font-semibold text-gray-800">{{ providers.length }}</span> de
+            <span class="font-semibold text-gray-800">{{ totalItems }}</span> resultados
+        </span>
+
+        <div class="flex items-center gap-1">
+            <button class="px-3 py-1 text-sm text-gray-600 border rounded hover:bg-gray-100 disabled:opacity-50"
+                (click)="previousPage()" [disabled]="currentPage === 1">
+                « Anterior
+            </button>
+
+            <button class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600" disabled>
+                {{ currentPage }}
+            </button>
+
+            <button class="px-3 py-1 text-sm text-gray-600 border rounded hover:bg-gray-100" (click)="nextPage()"
+                [disabled]="currentPage === totalPages">
+                Siguiente »
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 🧩 Modal para agregar categoría -->
+@if (showAddModal) {
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-lg w-11/12 sm:w-96 p-6 relative">
+        <button (click)="closeModal()" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800">
+            ✖
+        </button>
+
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">Registrar nuevo proveedor</h2>
+
+        <form [formGroup]="providerForm" (ngSubmit)="onSubmit()" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1"> Nombre </label>
+                <input type="text" formControlName="name" placeholder="Ej: Electrónica"
+                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                @if (providerForm.get('name')?.touched && providerForm.get('name')?.invalid) {
+                <div class="text-red-500 text-xs mt-1">
+                    El nombre es obligatorio.
+                </div>
+                }
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1"> Email </label>
+                <input type="email" formControlName="email" placeholder="Ej: example@example.com"
+                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                @if (providerForm.get('email')?.touched && providerForm.get('email')?.invalid) {
+                <div class="text-red-500 text-xs mt-1">
+                    El email es obligatorio.
+                </div>
+                }
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1"> Telefono </label>
+                <input type="tel" formControlName="phone" placeholder="Ej: 123456789"
+                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                @if (providerForm.get('phone')?.touched && providerForm.get('phone')?.invalid) {
+                <div class="text-red-500 text-xs mt-1">
+                    El telefono es obligatorio.
+                </div>
+                }
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1"> Direccion </label>
+                <input type="text" formControlName="address" placeholder="Ej: 123 Main St"
+                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                @if (providerForm.get('address')?.touched && providerForm.get('address')?.invalid) {
+                <div class="text-red-500 text-xs mt-1">
+                    La direccion es obligatoria.
+                </div>
+                }
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="button" (click)="closeModal()"
+                    class="px-3 py-1.5 text-sm border rounded text-gray-600 hover:bg-gray-100">
+                    Cancelar
+                </button>
+                @if (isLoading) {
+                <button type="button" class="px-3 py-1.5 text-sm border rounded text-gray-600 hover:bg-gray-100">
+                    Guardando...
+                </button>
+                } @if (!isLoading) {
+                <button type="submit" [disabled]="providerForm.invalid"
+                    class="px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50">
+                    Guardar
+                </button>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+}

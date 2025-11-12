@@ -11,6 +11,7 @@ import { Provider } from './admin/provider/provider';
 import { Nofound } from './admin/nofound/nofound';
 import { CategoryDetail } from './admin/category/category-detail/category-detail';
 import { AuthGuard } from './auth/guards/auth.guard';
+import { Providerdetail } from './admin/provider/provider-detail/providerdetail';
 
 export const routes: Routes = [
     {
@@ -62,6 +63,11 @@ export const routes: Routes = [
                 path: 'provider',
                 title: 'Provider',
                 component: Provider
+            },
+            {
+                path: 'provider/provider-detail/:id',
+                title: 'Provider Detail',
+                component: Providerdetail
             },
             {
                 path: '',

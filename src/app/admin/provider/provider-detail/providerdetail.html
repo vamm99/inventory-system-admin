@@ -1,1 +1,62 @@
-<p>providerdetail works!</p>
+<div>
+    <h1 class="text-2xl font-bold text-gray-800 my-4">Detalle de la Proveedor</h1>
+    <div class="flex gap-2 my-4">
+        <a routerLink="/admin/provider" class="text-blue-500">Regresar</a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="block rounded-md border border-gray-300 p-4 shadow-sm sm:p-6">
+            <form [formGroup]="providerForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-4" action="#">
+                <div class="flex flex-col gap-2">
+                    <label for="name">Nombre</label>
+                    <input type="text" id="name" name="name" class="border border-gray-300 rounded px-2 py-1" formControlName="name">
+                    @if (providerForm.get('name')?.touched && providerForm.get('name')?.invalid) {
+                        <div class="text-red-500 text-xs mt-1">
+                            El nombre es obligatorio.
+                        </div>
+                    }
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" class="border border-gray-300 rounded px-2 py-1" formControlName="email">
+                    @if (providerForm.get('email')?.touched && providerForm.get('email')?.invalid) {
+                        <div class="text-red-500 text-xs mt-1">
+                            El email es obligatorio.
+                        </div>
+                    }
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label for="phone">Telefono</label>
+                    <input type="tel" id="phone" name="phone" class="border border-gray-300 rounded px-2 py-1" formControlName="phone">
+                    @if (providerForm.get('phone')?.touched && providerForm.get('phone')?.invalid) {
+                        <div class="text-red-500 text-xs mt-1">
+                            El telefono es obligatorio.
+                        </div>
+                    }
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label for="address">Direccion</label>
+                    <input type="text" id="address" name="address" class="border border-gray-300 rounded px-2 py-1" formControlName="address">
+                    @if (providerForm.get('address')?.touched && providerForm.get('address')?.invalid) {
+                        <div class="text-red-500 text-xs mt-1">
+                            La direccion es obligatoria.
+                        </div>
+                    }
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label for="name">Fecha de creación</label>
+                    <input type="text" id="name" name="name" class="border border-gray-300 rounded px-2 py-1" formControlName="createdAt">
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label for="name">Fecha de modificación</label>
+                    <input type="text" id="name" name="name" class="border border-gray-300 rounded px-2 py-1" formControlName="updatedAt">
+                </div>
+                @if (isLoading) {
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Guardando...</button>
+                } @if (!isLoading) {
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Guardar</button>
+                }
+            </form>
+        </div>
+    </div>
+</div>

@@ -21,7 +21,7 @@ interface Provider {
     updatedAt: string;
 }
 
-interface ProviderShare {
+export interface ProviderShare {
     name?: string;
     email?: string;
     phone?: string;
@@ -69,10 +69,16 @@ export class ProviderService {
     shareProviderByName(providerShare: ProviderShare): Observable<ProviderResponse<Provider[]>> {
         const { name, email, phone } = providerShare;
         let url = `${this.apiUrl}/provider/share`;
-        if (name) url += `?name=${name}`;
-        if (email) url += `?email=${email}`;
-        if (phone) url += `?phone=${phone}`;
-        const response = this.http.get<ProviderResponse<Provider[]>>(url);
-        return response;
+
+        const params: string[] = [];
+        if (name) params.push(`name=${encodeURIComponent(name)}`);
+        if (email) params.push(`email=${encodeURIComponent(email)}`);
+        if (phone) params.push(`phone=${encodeURIComponent(phone)}`);
+
+        if (params.length > 0) {
+            url += `?${params.join('&')}`;
+        }
+
+        return this.http.get<ProviderResponse<Provider[]>>(url);
     }
 }
