@@ -56,6 +56,11 @@ export class ProviderService {
         return response;
     }
 
+    getProviderProducts(id: number, page: number = 1, limit: number = 10): Observable<ProviderResponse<Provider[]>> {
+        const response = this.http.get<ProviderResponse<Provider[]>>(`${this.apiUrl}/provider/products/${id}?page=${page}&limit=${limit}`);
+        return response;
+    }
+
     updateProvider(id: number, provider: Provider): Observable<ProviderResponse<Provider>> {
         const response = this.http.put<ProviderResponse<Provider>>(`${this.apiUrl}/provider/${id}`, provider);
         return response;

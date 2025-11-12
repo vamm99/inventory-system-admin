@@ -26,7 +26,6 @@ export class Detail implements OnInit {
   ngOnInit(): void {
     this.id = this.route.parent?.snapshot.params['id'];
     this.initForm();
-    console.log(this.id);
     this.loadProvider();
   }
 

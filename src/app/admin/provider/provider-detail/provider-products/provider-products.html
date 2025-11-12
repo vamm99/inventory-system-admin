@@ -1,3 +1,118 @@
-<div class="">
-<h1>Productos del proveedor {{ id }}</h1>
+<div>
+  <!-- 🔍 Buscador + Botón -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div class="flex w-full sm:w-3/5">
+      <input
+        type="text"
+        placeholder="Buscar producto por nombre o barcode"
+        [value]="searchTerm"
+        (input)="onSearchInput($event)"
+        class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+      />
+    </div>
+  </div>
+
+  <!-- 📋 Tabla -->
+  <div class="overflow-x-auto my-4">
+    <table class="min-w-full table-fixed border-collapse border border-gray-200">
+      <thead class="bg-gray-100">
+        <tr class="*:font-medium *:text-gray-900 text-left">
+          <th class="px-3 py-2 w-1/4 border border-gray-200">Barcode</th>
+          <th class="px-3 py-2 w-1/4 border border-gray-200">Nombre</th>
+          <th class="px-3 py-2 w-1/4 border border-gray-200">Descripción</th>
+          <th class="px-3 py-2 w-1/4 border border-gray-200">Categoria</th>
+          <th class="px-3 py-2 w-1/4 border border-gray-200">Costo</th>
+          <th class="px-3 py-2 w-1/4 border border-gray-200">Precio</th>
+          <th class="px-3 py-2 w-1/4 border border-gray-200">Stock</th>
+          <th class="px-3 py-2 w-1/4 border border-gray-200">Unidad</th>
+          <th class="px-3 py-2 w-1/4 border border-gray-200">Fecha de vencimiento</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-gray-200 text-left">
+        @for (product of products; track product.id) {
+        <tr class="*:text-gray-900 hover:bg-gray-50">
+          <td class="px-3 py-2 truncate font-mono text-xs">{{ product.barcode }}</td>
+          <td class="px-3 py-2 font-medium">{{ product.name }}</td>
+          <td class="px-3 py-2 text-gray-600">{{ product.description }}</td>
+          <td class="px-3 py-2">{{ product.category.name }}</td>
+          <td class="px-3 py-2 font-semibold text-gray-700">${{ product.coste }}</td>
+          <td class="px-3 py-2 font-semibold text-green-600">${{ product.price }}</td>
+
+          <!-- 🎨 Stock con badge atractivo -->
+          <td class="px-3 py-2">
+            <span
+              [class]="
+                'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs ' +
+                getStockClass(product.stock)
+              "
+            >
+              <span>{{ getStockIcon(product.stock) }}</span>
+              <span>{{ product.stock }}</span>
+            </span>
+          </td>
+
+          <td class="px-3 py-2 text-sm text-gray-600">{{ product.unit }}</td>
+
+          <!-- 🎨 Fecha de vencimiento con badge y estado -->
+          <td class="px-3 py-2">
+            <div class="flex flex-col gap-1">
+              <span
+                [class]="
+                  'inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs w-fit ' +
+                  getExpiryClass(product.expiredAt)
+                "
+              >
+                <span>{{ getExpiryIcon(product.expiredAt) }}</span>
+                <span>{{ product.expiredAt.split('T')[0] }}</span>
+              </span>
+              <span class="text-xs text-gray-500">{{ getExpiryStatus(product.expiredAt) }}</span>
+            </div>
+          </td>
+        </tr>
+        } @if (products.length === 0) {
+        <tr>
+          <td colspan="11" class="text-center text-gray-500 py-8">
+            <div class="flex flex-col items-center gap-2">
+              <span class="text-4xl">📦</span>
+              <span class="text-sm">No hay productos registrados</span>
+            </div>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 🔢 Paginación dinámica -->
+  <div class="flex flex-col sm:flex-row justify-between items-center mt-6 gap-3">
+    <span class="text-sm text-gray-600">
+      Página <span class="font-semibold text-gray-800">{{ currentPage }}</span> de
+      <span class="font-semibold text-gray-800">{{ totalPages }}</span> — Mostrando
+      <span class="font-semibold text-gray-800">{{ products.length }}</span> de
+      <span class="font-semibold text-gray-800">{{ totalItems }}</span> resultados
+    </span>
+
+    <div class="flex items-center gap-1">
+      <button
+        class="px-3 py-1 text-sm text-gray-600 border rounded hover:bg-gray-100 disabled:opacity-50"
+        (click)="previousPage()"
+        [disabled]="currentPage === 1"
+      >
+        « Anterior
+      </button>
+
+      <button class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600" disabled>
+        {{ currentPage }}
+      </button>
+
+      <button
+        class="px-3 py-1 text-sm text-gray-600 border rounded hover:bg-gray-100"
+        (click)="nextPage()"
+        [disabled]="currentPage === totalPages"
+      >
+        Siguiente »
+      </button>
+    </div>
+  </div>
 </div>
