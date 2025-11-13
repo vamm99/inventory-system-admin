@@ -51,6 +51,7 @@ export class Generate implements OnInit {
   isGenerating = false;  // Para el botón de generar
   isLoadingTable = false;  // Para la tabla
   isInitialLoad = true;
+  isGeneratingPDF = false;  // 🆕 Para el botón de PDF
 
   errorMessage = '';
   searchTerm = '';
@@ -76,7 +77,7 @@ export class Generate implements OnInit {
   }
 
   loadBarcodes(page: number = this.currentPage): void {
-    this.isLoadingTable = true;  // 🔹 Cambio aquí
+    this.isLoadingTable = true;
     this.errorMessage = '';
 
     let observable;
@@ -101,12 +102,12 @@ export class Generate implements OnInit {
           this.totalItems = response.pagination.total;
           this.totalPages = response.pagination.lastPage;
         }
-        this.isLoadingTable = false;  // 🔹 Cambio aquí
+        this.isLoadingTable = false;
         this.isInitialLoad = false;
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Error al cargar los códigos';
-        this.isLoadingTable = false;  // 🔹 Cambio aquí
+        this.isLoadingTable = false;
         this.isInitialLoad = false;
         console.error('Error loading barcodes:', error);
       },
@@ -117,7 +118,7 @@ export class Generate implements OnInit {
     this.submitted = true;
     if (this.codeForm.invalid) return;
 
-    this.isGenerating = true;  // 🔹 Cambio aquí
+    this.isGenerating = true;
     this.errorMessage = '';
     const codeData = this.codeForm.value;
 
@@ -126,11 +127,11 @@ export class Generate implements OnInit {
         this.loadBarcodes(1);
         this.codeForm.reset();
         this.submitted = false;
-        this.isGenerating = false;  // 🔹 Cambio aquí
+        this.isGenerating = false;
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Error al generar códigos';
-        this.isGenerating = false;  // 🔹 Cambio aquí
+        this.isGenerating = false;
         console.error('Error generating barcodes:', error);
       },
     });
@@ -144,7 +145,7 @@ export class Generate implements OnInit {
       return;
     }
 
-    this.isLoadingTable = true;  // 🔹 Cambio aquí
+    this.isLoadingTable = true;
     this.errorMessage = '';
 
     const barcodeShare: BarcodeShare = {
@@ -157,12 +158,12 @@ export class Generate implements OnInit {
         this.totalItems = this.codes.length;
         this.totalPages = 1;
         this.currentPage = 1;
-        this.isLoadingTable = false;  // 🔹 Cambio aquí
+        this.isLoadingTable = false;
       },
       error: (error) => {
         this.errorMessage = error.error?.message || 'Código no encontrado';
         this.codes = [];
-        this.isLoadingTable = false;  // 🔹 Cambio aquí
+        this.isLoadingTable = false;
         console.error('Error searching barcode:', error);
       },
     });
@@ -186,6 +187,49 @@ export class Generate implements OnInit {
     this.currentPage = 1;
     this.searchTerm = '';
     this.loadBarcodes(1);
+  }
+
+  // 🆕 Función para exportar PDF
+  exportToPDF(): void {
+    this.isGeneratingPDF = true;
+    this.errorMessage = '';
+
+    this.barcodeService.generateBarcodePDF(this.filterStatus).subscribe({
+      next: (blob) => {
+        // Crear un nombre de archivo descriptivo
+        const fileName = this.getFileName();
+        
+        // Crear un enlace temporal para descargar el archivo
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.click();
+        
+        // Limpiar
+        window.URL.revokeObjectURL(url);
+        this.isGeneratingPDF = false;
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Error al generar el PDF';
+        this.isGeneratingPDF = false;
+        console.error('Error generating PDF:', error);
+      },
+    });
+  }
+
+  // 🆕 Obtener nombre del archivo según el filtro
+  private getFileName(): string {
+    const date = new Date().toISOString().split('T')[0];
+    
+    switch (this.filterStatus) {
+      case 'used':
+        return `codigos-usados-${date}.pdf`;
+      case 'available':
+        return `codigos-disponibles-${date}.pdf`;
+      default:
+        return `todos-los-codigos-${date}.pdf`;
+    }
   }
 
   nextPage(): void {

@@ -137,4 +137,25 @@ export class BarcodeService {
     getUsedBarcodes(page: number = 1, limit: number = 10): Observable<BarcodeResponse<Barcode[]>> {
         return this.getBarcodesByUsageStatus(true, page, limit);
     }
+
+    /**
+     * Generar PDF de códigos de barras
+     * @param filterStatus - 'all' para todos, 'used' para usados, 'available' para disponibles
+     * @returns Observable con el archivo PDF como Blob
+     */
+    generateBarcodePDF(filterStatus: 'all' | 'used' | 'available'): Observable<Blob> {
+        let url = `${this.apiUrl}/barcode/pdf`;
+        
+        // Agregar query param según el filtro
+        if (filterStatus === 'used') {
+            url += '?isUsed=true';
+        } else if (filterStatus === 'available') {
+            url += '?isUsed=false';
+        }
+        // Si es 'all', no se agrega query param
+
+        return this.http.get(url, { 
+            responseType: 'blob' 
+        });
+    }
 }

@@ -21,7 +21,6 @@
                     }
                 </div>
             </div>
-            <!-- 🔹 Usa isGenerating en lugar de isLoading -->
             <button type="submit" [disabled]="isGenerating"
                 class="bg-blue-500 hover:bg-blue-600 text-white py-1.5 px-3 text-sm rounded w-full sm:w-[120px] h-[34px] flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed">
                 {{ isGenerating ? 'Generando...' : 'Generar' }}
@@ -34,33 +33,69 @@
         </div>
     </div>
 
-    <!-- 🔹 Filtros de estado - Usa isLoadingTable -->
-    <div class="flex gap-2 my-4">
-        <button (click)="filterByStatus('all')"
-            [class]="filterStatus === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
-            class="px-4 py-2 text-sm rounded hover:opacity-80 transition-opacity" [disabled]="isLoadingTable">
-            Todos
-        </button>
-        <button (click)="filterByStatus('available')"
-            [class]="filterStatus === 'available' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'"
-            class="px-4 py-2 text-sm rounded hover:opacity-80 transition-opacity" [disabled]="isLoadingTable">
-            Disponibles
-        </button>
-        <button (click)="filterByStatus('used')"
-            [class]="filterStatus === 'used' ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700'"
-            class="px-4 py-2 text-sm rounded hover:opacity-80 transition-opacity" [disabled]="isLoadingTable">
-            Usados
+    <!-- 🆕 Filtros de estado + Botón de exportar PDF -->
+    <div class="flex flex-wrap items-center justify-between gap-3 my-4">
+        <!-- Filtros de estado -->
+        <div class="flex gap-2">
+            <button (click)="filterByStatus('all')"
+                [class]="filterStatus === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
+                class="px-4 py-2 text-sm rounded hover:opacity-80 transition-opacity" [disabled]="isLoadingTable">
+                Todos
+            </button>
+            <button (click)="filterByStatus('available')"
+                [class]="filterStatus === 'available' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'"
+                class="px-4 py-2 text-sm rounded hover:opacity-80 transition-opacity" [disabled]="isLoadingTable">
+                Disponibles
+            </button>
+            <button (click)="filterByStatus('used')"
+                [class]="filterStatus === 'used' ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700'"
+                class="px-4 py-2 text-sm rounded hover:opacity-80 transition-opacity" [disabled]="isLoadingTable">
+                Usados
+            </button>
+        </div>
+
+        <!-- 🆕 Botón de exportar PDF -->
+        <button (click)="exportToPDF()" [disabled]="isGeneratingPDF || isLoadingTable || codes.length === 0"
+            class="flex items-center gap-2 px-4 py-2 text-sm rounded transition-all
+                   bg-purple-500 text-white hover:bg-purple-600 
+                   disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-purple-500">
+            <!-- Icono de PDF -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+            <span>
+                @if (isGeneratingPDF) {
+                Generando PDF...
+                } @else {
+                Exportar PDF
+                @if (filterStatus === 'all') {
+                (Todos)
+                } @else if (filterStatus === 'available') {
+                (Disponibles)
+                } @else {
+                (Usados)
+                }
+                }
+            </span>
         </button>
     </div>
 
     <!-- 🔹 Mensaje de error -->
     @if (errorMessage) {
-    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-        {{ errorMessage }}
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 flex items-start gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0 mt-0.5" viewBox="0 0 20 20"
+            fill="currentColor">
+            <path fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                clip-rule="evenodd" />
+        </svg>
+        <span>{{ errorMessage }}</span>
     </div>
     }
 
-    <!-- 📋 Tabla - Usa isLoadingTable -->
+    <!-- 📋 Tabla -->
     <div class="overflow-x-auto my-4">
         <div class="min-h-[400px] relative">
             <table class="min-w-full table-fixed border-collapse border border-gray-200">
@@ -139,7 +174,7 @@
         </div>
     </div>
 
-    <!-- 🔢 Paginación - Usa isLoadingTable -->
+    <!-- 🔢 Paginación -->
     <div class="flex flex-col sm:flex-row justify-between items-center mt-6 gap-3">
         <span class="text-sm text-gray-600">
             Página <span class="font-semibold text-gray-800">{{ currentPage }}</span> de
