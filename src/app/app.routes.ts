@@ -15,6 +15,8 @@ import { Providerdetail } from './admin/provider/provider-detail/providerdetail'
 import { ProductDetail } from './admin/product/product-detail/product-detail';
 import { Detail } from './admin/provider/provider-detail/detail/detail';
 import { ProviderProducts } from './admin/provider/provider-detail/provider-products/provider-products';
+import { Generate } from './admin/barcode/generate/generate';
+import { ViewCode } from './admin/barcode/view-code/view-code';
 
 export const routes: Routes = [
     {
@@ -35,7 +37,22 @@ export const routes: Routes = [
             {
                 path: 'barcode',
                 title: 'Barcode',
-                component: Barcode
+                component: Barcode,
+                children: [
+                    {
+                        path: 'generate',
+                        component: Generate,
+                    },
+                    {
+                        path: 'view-code',
+                        component: ViewCode,
+                    },
+                    {
+                        path: '',
+                        redirectTo: 'generate',
+                        pathMatch: 'full'
+                    }
+                ]
             },
             {
                 path: 'category',

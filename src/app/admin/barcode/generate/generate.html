@@ -1,0 +1,169 @@
+<div>
+    <div class="flex flex-col sm:flex-row sm:items-start gap-3">
+        <form [formGroup]="codeForm" (ngSubmit)="onSubmit()" class="flex space-x-2 items-start">
+            <div class="flex flex-col">
+                <input type="number" placeholder="Cantidad"
+                    class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    formControlName="count" />
+                <div class="h-5 mt-1">
+                    @if (codeForm.get('count')?.touched && codeForm.get('count')?.invalid) {
+                    <div class="text-red-500 text-xs">
+                        @if (codeForm.get('count')?.errors?.['required']) {
+                        El campo cantidad es obligatorio.
+                        }
+                        @if (codeForm.get('count')?.errors?.['min']) {
+                        La cantidad mínima es 1.
+                        }
+                        @if (codeForm.get('count')?.errors?.['max']) {
+                        La cantidad máxima es 100.
+                        }
+                    </div>
+                    }
+                </div>
+            </div>
+            <!-- 🔹 Usa isGenerating en lugar de isLoading -->
+            <button type="submit" [disabled]="isGenerating"
+                class="bg-blue-500 hover:bg-blue-600 text-white py-1.5 px-3 text-sm rounded w-full sm:w-[120px] h-[34px] flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed">
+                {{ isGenerating ? 'Generando...' : 'Generar' }}
+            </button>
+        </form>
+
+        <div class="flex w-1/2">
+            <input type="text" placeholder="Buscar código" [value]="searchTerm" (input)="onSearchInput($event)"
+                class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+        </div>
+    </div>
+
+    <!-- 🔹 Filtros de estado - Usa isLoadingTable -->
+    <div class="flex gap-2 my-4">
+        <button (click)="filterByStatus('all')"
+            [class]="filterStatus === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'"
+            class="px-4 py-2 text-sm rounded hover:opacity-80 transition-opacity" [disabled]="isLoadingTable">
+            Todos
+        </button>
+        <button (click)="filterByStatus('available')"
+            [class]="filterStatus === 'available' ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'"
+            class="px-4 py-2 text-sm rounded hover:opacity-80 transition-opacity" [disabled]="isLoadingTable">
+            Disponibles
+        </button>
+        <button (click)="filterByStatus('used')"
+            [class]="filterStatus === 'used' ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700'"
+            class="px-4 py-2 text-sm rounded hover:opacity-80 transition-opacity" [disabled]="isLoadingTable">
+            Usados
+        </button>
+    </div>
+
+    <!-- 🔹 Mensaje de error -->
+    @if (errorMessage) {
+    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        {{ errorMessage }}
+    </div>
+    }
+
+    <!-- 📋 Tabla - Usa isLoadingTable -->
+    <div class="overflow-x-auto my-4">
+        <div class="min-h-[400px] relative">
+            <table class="min-w-full table-fixed border-collapse border border-gray-200">
+                <thead class="bg-gray-100">
+                    <tr class="*:font-medium *:text-gray-900 text-left">
+                        <th class="px-3 py-2 w-[15%] border border-gray-200">Código</th>
+                        <th class="px-3 py-2 w-[15%] border border-gray-200">Imagen</th>
+                        <th class="px-3 py-2 w-[10%] border border-gray-200">Estado</th>
+                        <th class="px-3 py-2 w-[25%] border border-gray-200">Producto</th>
+                        <th class="px-3 py-2 w-[15%] border border-gray-200">Fecha de creación</th>
+                        <th class="px-3 py-2 w-[15%] border border-gray-200">Fecha de actualización</th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-gray-200 text-left">
+                    @if (isLoadingTable && isInitialLoad) {
+                    <tr>
+                        <td colspan="6" class="text-center text-gray-500 py-6">
+                            <div class="flex justify-center items-center">
+                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                                <span class="ml-2">Cargando...</span>
+                            </div>
+                        </td>
+                    </tr>
+                    } @else {
+                    @if (isLoadingTable && !isInitialLoad) {
+                    <tr>
+                        <td colspan="6" class="relative">
+                            <div class="absolute inset-0 bg-white bg-opacity-75 flex justify-center items-center z-10">
+                                <div class="flex items-center">
+                                    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                                    <span class="ml-2 text-sm text-gray-600">Actualizando...</span>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    }
+
+                    @for (code of codes; track code.id) {
+                    <tr class="*:text-gray-900">
+                        <td class="px-3 py-2 truncate">{{ code.barcode }}</td>
+                        <td class="px-3 py-2">
+                            <img [src]="code.imageUrl" [alt]="'Código ' + code.barcode"
+                                class="h-20 w-50 object-cover rounded" loading="lazy" />
+                        </td>
+                        <td class="px-3 py-2">
+                            <span [class]="getStatusClass(code)" class="px-2 py-1 text-xs font-semibold rounded-full">
+                                {{ getBarcodeStatus(code) }}
+                            </span>
+                        </td>
+                        <td class="px-3 py-2">
+                            @if (code.product) {
+                            <div class="text-sm">
+                                <p class="font-semibold">{{ code.product.name }}</p>
+                                <p class="text-gray-600">Precio: ${{ code.product.price }}</p>
+                                <p class="text-gray-600">Stock: {{ code.product.stock }}</p>
+                                <p class="text-gray-500 text-xs">{{ code.product.category.name }}</p>
+                            </div>
+                            } @else {
+                            <span class="text-gray-400 text-sm">Sin asignar</span>
+                            }
+                        </td>
+                        <td class="px-3 py-2">{{ code.createdAt.split('T')[0] }}</td>
+                        <td class="px-3 py-2">{{ code.updatedAt ? code.updatedAt.split('T')[0] : '-' }}</td>
+                    </tr>
+                    }
+
+                    @if (codes.length === 0 && !isLoadingTable) {
+                    <tr>
+                        <td colspan="6" class="text-center text-gray-500 py-3">No hay códigos registrados</td>
+                    </tr>
+                    }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 🔢 Paginación - Usa isLoadingTable -->
+    <div class="flex flex-col sm:flex-row justify-between items-center mt-6 gap-3">
+        <span class="text-sm text-gray-600">
+            Página <span class="font-semibold text-gray-800">{{ currentPage }}</span> de
+            <span class="font-semibold text-gray-800">{{ totalPages }}</span> — Mostrando
+            <span class="font-semibold text-gray-800">{{ codes.length }}</span> de
+            <span class="font-semibold text-gray-800">{{ totalItems }}</span> resultados
+        </span>
+
+        <div class="flex items-center gap-1">
+            <button
+                class="px-3 py-1 text-sm text-gray-600 border rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                (click)="previousPage()" [disabled]="currentPage === 1 || isLoadingTable">
+                « Anterior
+            </button>
+
+            <button class="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600" disabled>
+                {{ currentPage }}
+            </button>
+
+            <button
+                class="px-3 py-1 text-sm text-gray-600 border rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                (click)="nextPage()" [disabled]="currentPage === totalPages || isLoadingTable">
+                Siguiente »
+            </button>
+        </div>
+    </div>
+</div>

@@ -54,7 +54,7 @@ export class ProductDetail implements OnInit {
   initForm(): void {
     this.productForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
-      barcode: ['', [Validators.required]],
+      barcode: [{ value: '', disabled: true }, [Validators.required]],
       description: ['', [Validators.required, Validators.minLength(3)]],
       categoryId: ['', [Validators.required]],
       providerId: ['', [Validators.required]],

@@ -12,7 +12,8 @@ import {
   Truck, 
   User,
   ChevronDown,
-  Menu
+  Menu,
+  DoorOpen
 } from 'lucide-angular';
 
 interface MenuItem {
@@ -41,6 +42,7 @@ export class Admin {
 
   // Registramos los iconos a usar 
   icons = {
+    doorOpen: DoorOpen,
     home: Settings,
     barcode: CreditCard,
     category: LayoutGrid,
@@ -55,6 +57,7 @@ export class Admin {
 
   // Definimos los items del menú
   menuItems: MenuItem[] = [
+    { label: 'Egresos', path: '', icon: this.icons.doorOpen },
     { label: 'Inicio', path: '/admin/home', icon: this.icons.home },
     { label: 'Código de barras', path: '/admin/barcode', icon: this.icons.barcode },
     { label: 'Categoría', path: '/admin/category', icon: this.icons.category },

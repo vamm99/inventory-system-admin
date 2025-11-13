@@ -1,1 +1,26 @@
-<p>barcode works!</p>
+<div>
+    <h1 class="text-2xl font-bold text-gray-800 my-4">Código de barras</h1>
+    <div class="mb-6">
+    <nav class="bg-gray-100">
+      <ul class="flex space-x-1">
+        <li>
+          <a
+            class="flex items-center gap-2 rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors"
+            [routerLink]="['generate']"
+            routerLinkActive="bg-gray-200 text-gray-700"
+            >Generar códigos</a
+          >
+        </li>
+        <li>
+          <a
+            class="flex items-center gap-2 rounded-lg px-4 py-2 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors"
+            [routerLink]="['view-code']"
+            routerLinkActive="bg-gray-200 text-gray-700"
+            >Visualizar códigos</a
+          >
+        </li>
+      </ul>
+    </nav>
+  </div>
+    <router-outlet />
+</div>
