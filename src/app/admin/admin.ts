@@ -57,8 +57,8 @@ export class Admin {
 
   // Definimos los items del menú
   menuItems: MenuItem[] = [
-    { label: 'Egresos', path: '', icon: this.icons.doorOpen },
     { label: 'Inicio', path: '/admin/home', icon: this.icons.home },
+    { label: 'Egresos', path: '/admin/expenses', icon: this.icons.doorOpen },
     { label: 'Código de barras', path: '/admin/barcode', icon: this.icons.barcode },
     { label: 'Categoría', path: '/admin/category', icon: this.icons.category },
     // { label: 'Deshe', path: '/admin/deshe', icon: this.icons.deshe },

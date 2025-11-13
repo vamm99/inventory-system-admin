@@ -1,0 +1,62 @@
+<div>
+  <h1 class="text-2xl font-bold text-gray-800 my-4">Egresos</h1>
+
+  <!-- 🔍 Buscador -->
+  <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+    <input
+      type="text"
+      placeholder="Leer producto"
+      class="w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-400"
+      [(ngModel)]="barcode"
+      (input)="onBarcodeInput()"
+    />
+  </div>
+  <button (click)="printTableData()" class="bg-blue-600 text-white px-4 py-2 rounded mt-4">
+    Imprimir datos en consola
+  </button>
+
+  <!-- 📋 Tabla -->
+  <div class="overflow-x-auto my-4">
+    <table class="min-w-full table-fixed border-collapse border border-gray-200">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="px-3 py-2 border border-gray-200">Nombre</th>
+          <th class="px-3 py-2 border border-gray-200 w-32 text-center">Cantidad</th>
+          <th class="px-3 py-2 border border-gray-200 w-40 text-center">Acciones</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        @for (item of items; track item.id) {
+        <tr>
+          <td class="px-3 py-2 border border-gray-200">{{ item.name }}</td>
+
+          <td class="px-3 py-2 border border-gray-200 text-center">
+            {{ item.quantity }}
+          </td>
+
+          <td class="px-3 py-2 border border-gray-200 text-center">
+            <button class="bg-red-500 text-white px-3 py-1 rounded" (click)="removeProduct(item)">
+              Eliminar
+            </button>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TOTAL DE UNIDADES -->
+  <div class="mt-6">
+    <table class="min-w-full border-collapse border border-gray-200">
+      <thead class="bg-gray-100">
+        <tr>
+          <th class="px-3 py-2 border border-gray-200 text-right">TOTAL DE UNIDADES</th>
+          <th class="px-3 py-2 border border-gray-200 text-center w-40">
+            {{ getTotalUnits() }}
+          </th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+</div>

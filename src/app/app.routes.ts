@@ -17,6 +17,7 @@ import { Detail } from './admin/provider/provider-detail/detail/detail';
 import { ProviderProducts } from './admin/provider/provider-detail/provider-products/provider-products';
 import { Generate } from './admin/barcode/generate/generate';
 import { ViewCode } from './admin/barcode/view-code/view-code';
+import { Expenses } from './admin/expenses/expenses';
 
 export const routes: Routes = [
     {
@@ -33,6 +34,11 @@ export const routes: Routes = [
                 path: 'home',
                 title: 'Home',
                 component: Home
+            },
+            {
+                path: 'expenses',
+                title: 'Expenses',
+                component: Expenses
             },
             {
                 path: 'barcode',
