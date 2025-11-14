@@ -4,6 +4,21 @@ import { HttpClient } from "@angular/common/http";
 import { inject } from "@angular/core";
 import { Observable } from "rxjs";
 
+interface Kardex {
+    id?: number;
+    name?: string;
+    productId?: number;
+    quantity?: number;
+    stock?: number;
+    comment?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    product?: {
+        id: number;
+        name: string;
+    }
+}
+
 interface Pagination {
     limit: number;
     page: number;
@@ -47,6 +62,13 @@ interface ProductResponse<T> {
     pagination?: Pagination;
 }
 
+interface KardexResponse<T> {
+    status: number;
+    message: string;
+    data?: T;
+    pagination?: Pagination;
+}
+
 @Injectable({
     providedIn: 'root'
 })
@@ -59,6 +81,11 @@ export class ProductService {
         return response;
     }
 
+    createKardex(product: Kardex[]): Observable<KardexResponse<void>> {
+        const response = this.http.post<KardexResponse<void>>(`${this.apiUrl}/product/kardex`, product);
+        return response;
+    }
+
     getAllProducts(page: number = 1, limit: number = 10): Observable<ProductResponse<Product[]>> {
         const response = this.http.get<ProductResponse<Product[]>>(`${this.apiUrl}/product?page=${page}&limit=${limit}`);
         return response;
@@ -66,6 +93,11 @@ export class ProductService {
 
     getProductById(id: number): Observable<ProductResponse<Product>> {
         const response = this.http.get<ProductResponse<Product>>(`${this.apiUrl}/product/${id}`);
+        return response;
+    }
+
+    getProductByBarcode(barcode: string): Observable<ProductResponse<Product>> {
+        const response = this.http.get<ProductResponse<Product>>(`${this.apiUrl}/product/barcode/${barcode}`);
         return response;
     }
 

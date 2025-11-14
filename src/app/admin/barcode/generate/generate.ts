@@ -54,6 +54,7 @@ export class Generate implements OnInit {
   isGeneratingPDF = false;  // 🆕 Para el botón de PDF
 
   errorMessage = '';
+  successMessage = '';
   searchTerm = '';
 
   filterStatus: 'all' | 'used' | 'available' = 'all';
@@ -263,5 +264,13 @@ export class Generate implements OnInit {
     return barcode.isUsed
       ? 'bg-red-100 text-red-800'
       : 'bg-green-100 text-green-800';
+  }
+
+  closeError(): void {
+    this.errorMessage = '';
+  }
+
+  closeSuccess(): void {
+    this.successMessage = '';
   }
 }

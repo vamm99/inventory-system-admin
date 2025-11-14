@@ -22,6 +22,7 @@ export class Detail implements OnInit {
   submitted = false;
   isLoading = false;
   errorMessage = '';
+  successMessage = '';
 
   ngOnInit(): void {
     this.id = this.route.parent?.snapshot.params['id'];
@@ -119,5 +120,13 @@ export class Detail implements OnInit {
   isValidPhone(): boolean {
     const phoneControl = this.providerForm.get('phone');
     return phoneControl?.valid || false;
+  }
+
+  closeError(): void {
+    this.errorMessage = '';
+  }
+
+  closeSuccess(): void {
+    this.successMessage = '';
   }
 }
