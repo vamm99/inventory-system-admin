@@ -18,6 +18,7 @@ import { ProviderProducts } from './admin/provider/provider-detail/provider-prod
 import { Generate } from './admin/barcode/generate/generate';
 import { ViewCode } from './admin/barcode/view-code/view-code';
 import { Expenses } from './admin/expenses/expenses';
+import { Profile } from './admin/profile/profile';
 
 export const routes: Routes = [
     {
@@ -116,7 +117,12 @@ export const routes: Routes = [
                 ]
             },
             {
-                path: '',
+                path: 'profile',
+                title: 'Profile',
+                component: Profile
+            },
+            {
+                path: '**',
                 redirectTo: 'home',
                 pathMatch: 'full'
             }

@@ -71,7 +71,7 @@ export class Admin {
   accountDropdownItems: DropdownItem[] = [
     {
       label: 'Detalles',
-      path: '#'
+      path: '/admin/profile'
     },
     {
       label: 'Cerrar Sesión',

@@ -1,0 +1,82 @@
+<div>
+  <h1 class="text-2xl font-bold text-gray-800 my-4">Perfil</h1>
+
+  <div class="mb-4">
+    <article class="rounded-xl bg-white p-4 ring-3 ring-indigo-50 sm:p-6 lg:p-8">
+      <div class="flex items-start sm:gap-8">
+        <div>
+          <strong
+            class="rounded-sm border border-blue-500 bg-blue-500 px-3 py-1.5 text-[10px] font-medium text-white"
+          >
+            {{ user?.name }}
+          </strong>
+
+          <h3 class="mt-4 text-lg font-medium sm:text-xl">
+            {{ user?.email }}
+          </h3>
+
+          <p class="mt-1 text-sm text-gray-700">
+            {{ user?.role }}
+          </p>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- 🔹 Mensaje de error -->
+  @if (errorMessage) {
+  <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg relative">
+    <button
+      class="absolute top-2 right-2 text-red-600 hover:text-red-800 font-bold"
+      (click)="closeError()"
+    >
+      ×
+    </button>
+    <p class="text-red-700 text-sm">{{ errorMessage }}</p>
+  </div>
+  } @if (successMessage) {
+  <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg relative">
+    <button
+      class="absolute top-2 right-2 text-green-600 hover:text-green-800 font-bold"
+      (click)="closeSuccess()"
+    >
+      ×
+    </button>
+    <p class="text-green-700 text-sm">{{ successMessage }}</p>
+  </div>
+  }
+  <div class="mt-4">
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Actualizar contraseña </label>
+        <input
+          type="password"
+          id="password"
+          formControlName="password"
+          class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+        />
+        @if (profileForm.get('password')?.touched && profileForm.get('password')?.invalid) {
+        <div class="text-red-500 text-xs mt-1">La contraseña es obligatoria.</div>
+        }
+      </div>
+      <div class="flex justify-end gap-2">
+        @if (isLoading) {
+        <button
+          type="button"
+          class="px-3 py-1.5 text-sm border rounded text-gray-600 hover:bg-gray-100"
+        >
+          Guardando...
+        </button>
+        } @if (!isLoading) {
+        <button
+          type="submit"
+          [disabled]="profileForm.invalid"
+          class="px-3 py-1.5 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+        >
+          Guardar
+        </button>
+        }
+      </div>
+    </form>
+  </div>
+</div>
