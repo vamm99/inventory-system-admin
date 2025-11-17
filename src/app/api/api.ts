@@ -1,1 +1,1 @@
-export const API_URL = 'http://ec2-3-142-219-114.us-east-2.compute.amazonaws.com';
+export const API_URL = 'https://kgbapp.chickenkiller.com';
